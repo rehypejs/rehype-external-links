@@ -8,23 +8,69 @@
 [![Backers][backers-badge]][collective]
 [![Chat][chat-badge]][chat]
 
-[**rehype**][rehype] plugin to automatically add `target` and `rel` attributes
-to external links.
+**[rehype][]** plugin to add `rel` (and `target`) to external links.
+
+## Contents
+
+*   [What is this?](#what-is-this)
+*   [When should I use this?](#when-should-i-use-this)
+*   [Install](#install)
+*   [Use](#use)
+*   [API](#api)
+    *   [`unified().use(rehypeExternalLinks[, options])`](#unifieduserehypeexternallinks-options)
+*   [Types](#types)
+*   [Compatibility](#compatibility)
+*   [Security](#security)
+*   [Contribute](#contribute)
+*   [License](#license)
+
+## What is this?
+
+This package is a [unified][] ([rehype][]) plugin to add `rel` (and `target`)
+attributes to external links.
+It is particularly useful when displaying user content on your reputable site,
+because users could link to disreputable sources (spam, scams, etc), because
+search engines and other bots will discredit your site for linking to them (or
+legitimize their site).
+This plugin adds certain `rel` attributes to prevent that from happening.
+
+**unified** is a project that transforms content with abstract syntax trees
+(ASTs).
+**rehype** adds support for HTML to unified.
+**hast** is the HTML AST that rehype uses.
+This is a rehype plugin that applies syntax highlighting to the AST.
+
+## When should I use this?
+
+This project is useful when you want to display user content on your website,
+such as articles or comments.
 
 ## Install
 
-This package is [ESM only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c):
-Node 12+ is needed to use it and it must be `import`ed instead of `require`d.
-
-[npm][]:
+This package is [ESM only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c).
+In Node.js (version 12.20+, 14.14+, or 16.0+), install with [npm][]:
 
 ```sh
 npm install rehype-external-links
 ```
 
+In Deno with [Skypack][]:
+
+```js
+import rehypeExternalLinks from 'https://cdn.skypack.dev/rehype-external-links@1?dts'
+```
+
+In browsers with [Skypack][]:
+
+```html
+<script type="module">
+  import rehypeExternalLinks from 'https://cdn.skypack.dev/rehype-external-links@1?min'
+</script>
+```
+
 ## Use
 
-Say we have the following module, `example.js`:
+Say our module `example.js` looks as follows:
 
 ```js
 import {unified} from 'unified'
@@ -33,20 +79,21 @@ import remarkRehype from 'remark-rehype'
 import rehypeExternalLinks from 'rehype-external-links'
 import rehypeStringify from 'rehype-stringify'
 
-const input = '[rehype](https://github.com/rehypejs/rehype)'
+main()
 
-unified()
-  .use(remarkParse)
-  .use(remarkRehype)
-  .use(rehypeExternalLinks, {target: false, rel: ['nofollow']})
-  .use(rehypeStringify)
-  .process(input)
-  .then((file) => {
-    console.log(String(file))
-  })
+async function main() {
+  const file = await unified()
+    .use(remarkParse)
+    .use(remarkRehype)
+    .use(rehypeExternalLinks, {target: false, rel: ['nofollow']})
+    .use(rehypeStringify)
+    .process('[rehype](https://github.com/rehypejs/rehype)')
+
+  console.log(String(file))
+}
 ```
 
-Now, running `node example` yields:
+Now running `node example.js` yields:
 
 ```html
 <p><a href="https://github.com/rehypejs/rehype" rel="nofollow">rehype</a></p>
@@ -59,43 +106,66 @@ The default export is `rehypeExternalLinks`.
 
 ### `unified().use(rehypeExternalLinks[, options])`
 
-Automatically add `target` and `rel` attributes to external links.
+Add `rel` (and `target`) to external links.
 
 ##### `options`
 
+Configuration (optional).
+
 ###### `options.target`
 
-How to display referenced documents (`string?`: `_self`, `_blank`, `_parent`,
+How to open external documents (`string?`: `_self`, `_blank`, `_parent`,
 or `_top`, default: `_blank`).
 Pass `false` to not set `target`s on links.
 
+> 👉 **Note**: [you should likely pass `false`][css-tricks].
+
 ###### `options.rel`
 
-[Link types][mdn-rel] to hint about the referenced documents (`Array.<string>`
+[Link types][mdn-rel] to hint about the referenced documents (`Array<string>`
 or `string`, default: `['nofollow', 'noopener', 'noreferrer']`).
 Pass `false` to not set `rel`s on links.
 
-**Note**: when using a `target`, add [`noopener` and `noreferrer`][mdn-a] to
-avoid exploitation of the `window.opener` API.
+> 👉 **Note**: you should at least set `['nofollow']`.
+
+> ⚠️ **Danger**: when using a `target`, add [`noopener` and `noreferrer`][mdn-a]
+> to avoid exploitation of the `window.opener` API.
 
 ###### `options.protocols`
 
-Protocols to check, such as `mailto` or `tel` (`Array.<string>`, default:
-`['http', 'https']`).
+Protocols to see as external, such as `mailto` or `tel` (`Array<string>`,
+default: `['http', 'https']`).
 
 ###### `options.content`
 
-[**hast**][hast] content to insert at the end of external links
-([**Node**][node] or [**Children**][children]).
+**[hast][]** content to insert at the end of external links ([`Node`][node] or
+[`Children`][children], optional).
 Will be inserted in a `<span>` element.
 
-Useful for improving accessibility by [giving users advanced warning when
-opening a new window][g201].
+> 👉 **Note**: you should set this when using `target` to adhere to
+> accessibility guidelines by [giving users advanced warning when opening a new
+> window][g201].
 
 ###### `options.contentProperties`
 
-[`Properties`][properties] to add to the `span` wrapping `content`, when
-given.
+Attributes to add to the `<span>`s wrapping `options.content`
+([`Properties`][properties], optional).
+
+## Types
+
+This package is fully typed with [TypeScript][].
+It exports an `Options` type, which specifies the interface of the accepted
+options.
+
+## Compatibility
+
+Projects maintained by the unified collective are compatible with all maintained
+versions of Node.js.
+As of now, that is Node.js 12.20+, 14.14+, and 16.0+.
+Our projects sometimes work with older versions, but this is not guaranteed.
+
+This plugin works with `rehype-parse` version 3+, `rehype-stringify` version 3+,
+`rehype` version 4+, and `unified` version 6+.
 
 ## Security
 
@@ -103,7 +173,7 @@ Improper use of `rehype-external-links` can open you up to a
 [cross-site scripting (XSS)][xss] attack.
 
 Either do not combine this plugin with user content or use
-[`rehype-sanitize`][sanitize].
+[`rehype-sanitize`][rehype-sanitize].
 
 ## Contribute
 
@@ -149,6 +219,8 @@ abide by its terms.
 
 [npm]: https://docs.npmjs.com/cli/install
 
+[skypack]: https://www.skypack.dev
+
 [health]: https://github.com/rehypejs/.github
 
 [contributing]: https://github.com/rehypejs/.github/blob/HEAD/contributing.md
@@ -161,11 +233,15 @@ abide by its terms.
 
 [author]: https://wooorm.com
 
+[typescript]: https://www.typescriptlang.org
+
+[unified]: https://github.com/unifiedjs/unified
+
 [rehype]: https://github.com/rehypejs/rehype
 
 [xss]: https://en.wikipedia.org/wiki/Cross-site_scripting
 
-[sanitize]: https://github.com/rehypejs/rehype-sanitize
+[rehype-sanitize]: https://github.com/rehypejs/rehype-sanitize
 
 [mdn-rel]: https://developer.mozilla.org/en-US/docs/Web/HTML/Link_types
 
@@ -180,3 +256,5 @@ abide by its terms.
 [children]: https://github.com/syntax-tree/unist#child
 
 [g201]: https://www.w3.org/WAI/WCAG21/Techniques/general/G201
+
+[css-tricks]: https://css-tricks.com/use-target_blank/
