@@ -29,9 +29,10 @@
 This package is a [unified][] ([rehype][]) plugin to add `rel` (and `target`)
 attributes to external links.
 It is particularly useful when displaying user content on your reputable site,
-because users could link to disreputable sources (spam, scams, etc), because
-search engines and other bots will discredit your site for linking to them (or
-legitimize their site).
+because users could link to disreputable sources (spam, scams, etc), as search
+engines and other bots will discredit your site for linking to them (or
+legitimize their sites).
+In short: linking to something signals trust, but you can’t trust users.
 This plugin adds certain `rel` attributes to prevent that from happening.
 
 **unified** is a project that transforms content with abstract syntax trees
@@ -42,8 +43,8 @@ This is a rehype plugin that applies syntax highlighting to the AST.
 
 ## When should I use this?
 
-This project is useful when you want to display user content on your website,
-such as articles or comments.
+This project is useful when you want to display user content from authors you
+don’t trust, such as articles or comments, on your website.
 
 ## Install
 
