@@ -39,7 +39,7 @@ This plugin adds certain `rel` attributes to prevent that from happening.
 (ASTs).
 **rehype** adds support for HTML to unified.
 **hast** is the HTML AST that rehype uses.
-This is a rehype plugin that applies syntax highlighting to the AST.
+This is a rehype plugin that adds `rel` (and `target`) to `<a>`s in the AST.
 
 ## When should I use this?
 
