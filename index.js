@@ -9,15 +9,15 @@
  *   How to display referenced documents (`string?`: `_self`, `_blank`,
  *   `_parent`, or `_top`, default: `_blank`).
  *   Pass `false` to not set `target`s on links.
- * @property {string[]|string|false} [rel=['nofollow', 'noopener', 'noreferrer']]
+ * @property {Array<string>|string|false} [rel=['nofollow', 'noopener', 'noreferrer']]
  *   Link types to hint about the referenced documents.
  *   Pass `false` to not set `rel`s on links.
  *
  *   **Note**: when using a `target`, add `noopener` and `noreferrer` to avoid
  *   exploitation of the `window.opener` API.
- * @property {string[]} [protocols=['http', 'https']]
+ * @property {Array<string>} [protocols=['http', 'https']]
  *   Protocols to check, such as `mailto` or `tel`.
- * @property {ElementChild|ElementChild[]} [content]
+ * @property {ElementChild|Array<ElementChild>} [content]
  *   hast content to insert at the end of external links.
  *   Will be inserted in a `<span>` element.
  *
@@ -39,7 +39,7 @@ const defaultProtocols = ['http', 'https']
 /**
  * Plugin to automatically add `target` and `rel` attributes to external links.
  *
- * @type {import('unified').Plugin<[Options?] | void[], Root>}
+ * @type {import('unified').Plugin<[Options?] | Array<void>, Root>}
  */
 export default function rehypeExternalLinks(options = {}) {
   const target = options.target
