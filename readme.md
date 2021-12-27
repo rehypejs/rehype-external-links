@@ -44,7 +44,8 @@ This is a rehype plugin that adds `rel` (and `target`) to `<a>`s in the AST.
 ## When should I use this?
 
 This project is useful when you want to display user content from authors you
-don’t trust, such as articles or comments, on your website.
+don’t trust (such as comments), as they might include links you don’t endorse,
+on your website.
 
 ## Install
 
