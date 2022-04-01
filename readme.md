@@ -56,17 +56,17 @@ In Node.js (version 12.20+, 14.14+, or 16.0+), install with [npm][]:
 npm install rehype-external-links
 ```
 
-In Deno with [Skypack][]:
+In Deno with [`esm.sh`][esmsh]:
 
 ```js
-import rehypeExternalLinks from 'https://cdn.skypack.dev/rehype-external-links@1?dts'
+import rehypeExternalLinks from 'https://esm.sh/rehype-external-links@1'
 ```
 
-In browsers with [Skypack][]:
+In browsers with [`esm.sh`][esmsh]:
 
 ```html
 <script type="module">
-  import rehypeExternalLinks from 'https://cdn.skypack.dev/rehype-external-links@1?min'
+  import rehypeExternalLinks from 'https://esm.sh/rehype-external-links@1?bundle'
 </script>
 ```
 
@@ -221,7 +221,7 @@ abide by its terms.
 
 [npm]: https://docs.npmjs.com/cli/install
 
-[skypack]: https://www.skypack.dev
+[esmsh]: https://esm.sh
 
 [health]: https://github.com/rehypejs/.github
 
