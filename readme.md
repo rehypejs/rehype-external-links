@@ -113,6 +113,33 @@ Add `rel` (and `target`) to external links.
 ##### `options`
 
 Configuration (optional).
+It can also be a function which returns an options object.
+
+```ts
+await rehype()
+.use(
+  rehypeExternalLinks,
+
+  // You may need to coerce the types to avoid vscode leaving errors everywhere
+  /** @type {import("rehype-external-links").inputOptions} */
+  ((node, tree) => {
+    return {
+      target: node.properties.id == 5 ? "_blank" : false
+    };
+  })
+)
+...
+```
+
+Or
+
+```ts
+await rehype()
+.use(rehypeExternalLinks, {
+  target: "_blank"
+})
+...
+```
 
 ###### `options.target`
 
@@ -152,6 +179,22 @@ Will be inserted in a `<span>` element.
 
 Attributes to add to the `<span>`s wrapping `options.content`
 ([`Properties`][properties], optional).
+
+###### `options.exclude`
+
+Excludes all anchors which have a property in the excluded array
+of property names from being processed by `rehype-external-links`.
+
+```ts
+{
+  // Anchor with any of these properties 
+  // will be excluded
+  exclude: ["target", "data-not-external", ...]
+}
+```
+
+> 👉 **Note**: if you use a function for the options
+> configuration object, it won’t unset the `exclude` config option.
 
 ## Types
 

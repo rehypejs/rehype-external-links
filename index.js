@@ -3,8 +3,13 @@
  * @typedef {import('hast').Properties} Properties
  * @typedef {import('hast').Element['children'][number]} ElementChild
  *
+ * @typedef {Options | ((node: import('hast').Element, tree: Root) => Options)} inputOptions
+ *   Configuration as either a function or an object.
+ *
  * @typedef Options
  *   Configuration.
+ * @property {string[]} [exclude=[]]
+ *   Exclude anchors with the following attributes from `rehype-external-links`
  * @property {'_self'|'_blank'|'_parent'|'_top'|false} [target='_blank']
  *   How to display referenced documents (`string?`: `_self`, `_blank`,
  *   `_parent`, or `_top`, default: `_blank`).
@@ -37,20 +42,29 @@ const defaultRel = ['nofollow', 'noopener', 'noreferrer']
 const defaultProtocols = ['http', 'https']
 
 /**
+ * Based on https://stackoverflow.com/a/2970588/12140185
+ *
+ * @param {string} string_
+ * @returns Transforms normal strings to camelCase
+ */
+function camelCase(string_) {
+  return string_
+    .replace(/-(.)/g, function ($1) {
+      return $1.toUpperCase()
+    })
+    .replace(/-/g, '')
+    .replace(/^(.)/, function ($1) {
+      return $1.toLowerCase()
+    })
+}
+
+/**
  * Plugin to automatically add `target` and `rel` attributes to external links.
  *
- * @type {import('unified').Plugin<[Options?] | Array<void>, Root>}
+ * @param {inputOptions} [options = {}]
+ * @type {import('unified').Plugin<[inputOptions?] | Array<void>, Root>}
  */
 export default function rehypeExternalLinks(options = {}) {
-  const target = options.target
-  const rel = typeof options.rel === 'string' ? parse(options.rel) : options.rel
-  const protocols = options.protocols || defaultProtocols
-  const content =
-    options.content && !Array.isArray(options.content)
-      ? [options.content]
-      : options.content
-  const contentProperties = options.contentProperties || {}
-
   return (tree) => {
     visit(tree, 'element', (node) => {
       if (
@@ -60,6 +74,30 @@ export default function rehypeExternalLinks(options = {}) {
       ) {
         const url = node.properties.href
         const protocol = url.slice(0, url.indexOf(':'))
+
+        const options_ =
+          typeof options === 'function' ? options(node, tree) : options
+        const exclude = options_.exclude || []
+
+        // Rehype camelizes some properties and doesn't for some others, to gurantee compatibility
+        // and avoid edge cases, I'm camelizing everything manually,
+        const propertyKeys = new Set(
+          Object.keys(node.properties).map((x) => camelCase(x))
+        )
+        const noExcludeProperties = exclude.every(
+          (x) => !propertyKeys.has(camelCase(x))
+        )
+        if (!noExcludeProperties) return
+
+        const target = options_.target
+        const rel =
+          typeof options_.rel === 'string' ? parse(options_.rel) : options_.rel
+        const protocols = options_.protocols || defaultProtocols
+        const content =
+          options_.content && !Array.isArray(options_.content)
+            ? [options_.content]
+            : options_.content
+        const contentProperties = options_.contentProperties || {}
 
         if (absolute(url) && protocols.includes(protocol)) {
           if (target !== false) {
