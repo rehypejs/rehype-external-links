@@ -1,32 +1,57 @@
 /**
  * @typedef {import('hast').Root} Root
  * @typedef {import('hast').Properties} Properties
- * @typedef {import('hast').Element['children'][number]} ElementChild
+ * @typedef {import('hast').Element} Element
  *
- * @typedef {Options | ((node: import('hast').Element, tree: Root) => Options)} inputOptions
- *   Configuration as either a function or an object.
+ * @typedef {Element['children'][number]} ElementChild
+ *
+ * @typedef {'_self'|'_blank'|'_parent'|'_top'|false} Target
+ * @typedef {Array<string>|string|false} Rel
+ * @typedef {Array<string>} Protocols
+ * @typedef {ElementChild|Array<ElementChild>} Content
+ * @typedef {Properties} ContentProperties
+ *
+ * @callback TargetCallback
+ * @param {Element} node
+ * @returns {Target|null|undefined}
+ *
+ * @callback RelCallback
+ * @param {Element} node
+ * @returns {Rel|null|undefined}
+ *
+ * @callback ProtocolsCallback
+ * @param {Element} node
+ * @returns {Protocols|null|undefined}
+ *
+ * @callback ContentCallback
+ * @param {Element} node
+ * @returns {Content|null|undefined}
+ *
+ * @callback ContentPropertiesCallback
+ * @param {Element} node
+ * @returns {Properties|null|undefined}
  *
  * @typedef Options
  *   Configuration.
- * @property {'_self'|'_blank'|'_parent'|'_top'|false} [target='_blank']
+ * @property {Target|TargetCallback} [target='_blank']
  *   How to display referenced documents (`string?`: `_self`, `_blank`,
  *   `_parent`, or `_top`, default: `_blank`).
  *   Pass `false` to not set `target`s on links.
- * @property {Array<string>|string|false} [rel=['nofollow', 'noopener', 'noreferrer']]
+ * @property {Rel|RelCallback} [rel=['nofollow', 'noopener', 'noreferrer']]
  *   Link types to hint about the referenced documents.
  *   Pass `false` to not set `rel`s on links.
  *
  *   **Note**: when using a `target`, add `noopener` and `noreferrer` to avoid
  *   exploitation of the `window.opener` API.
- * @property {Array<string>} [protocols=['http', 'https']]
+ * @property {Protocols|ProtocolsCallback} [protocols=['http', 'https']]
  *   Protocols to check, such as `mailto` or `tel`.
- * @property {ElementChild|Array<ElementChild>} [content]
+ * @property {Content|ContentCallback} [content]
  *   hast content to insert at the end of external links.
  *   Will be inserted in a `<span>` element.
  *
  *   Useful for improving accessibility by giving users advanced warning when
  *   opening a new window.
- * @property {Properties} [contentProperties]
+ * @property {ContentProperties|ContentPropertiesCallback} [contentProperties]
  *   hast properties to add to the `span` wrapping `content`, when given.
  */
 
@@ -40,27 +65,18 @@ const defaultRel = ['nofollow', 'noopener', 'noreferrer']
 const defaultProtocols = ['http', 'https']
 
 /**
- * Based on https://stackoverflow.com/a/2970588/12140185
  *
- * @param {string} string_
- * @returns Transforms normal strings to camelCase
+ * @param {Options[keyof Options]} value
+ * @param {Element} node
  */
-function camelCase(string_) {
-  return string_
-    .replace(/-(.)/g, function ($1) {
-      return $1.toUpperCase()
-    })
-    .replace(/-/g, '')
-    .replace(/^(.)/, function ($1) {
-      return $1.toLowerCase()
-    })
+function createFunction(value, node) {
+  return typeof value === 'function' ? value(node) : value
 }
 
 /**
  * Plugin to automatically add `target` and `rel` attributes to external links.
  *
- * @param {inputOptions} [options = {}]
- * @type {import('unified').Plugin<[inputOptions?] | Array<void>, Root>}
+ * @type {import('unified').Plugin<[Options?] | Array<void>, Root>}
  */
 export default function rehypeExternalLinks(options = {}) {
   return (tree) => {
@@ -73,20 +89,27 @@ export default function rehypeExternalLinks(options = {}) {
         const url = node.properties.href
         const protocol = url.slice(0, url.indexOf(':'))
 
-        const noExcludeProperties = exclude.every(
-          (x) => !propertyKeys.has(camelCase(x))
+        const target = /** @type {Target} */ (
+          createFunction(options.target, node)
         )
-        if (!noExcludeProperties) return
 
-        const target = options_.target
-        const rel =
-          typeof options_.rel === 'string' ? parse(options_.rel) : options_.rel
-        const protocols = options_.protocols || defaultProtocols
+        const _rel = /** @type {Rel} */ (createFunction(options.rel, node))
+        const rel = typeof _rel === 'string' ? parse(_rel) : _rel
+
+        const protocols =
+          /** @type {Protocols} */ (createFunction(options.protocols, node)) ||
+          defaultProtocols
+
+        const _content = /** @type {Content} */ (
+          createFunction(options.content, node)
+        )
         const content =
-          options_.content && !Array.isArray(options_.content)
-            ? [options_.content]
-            : options_.content
-        const contentProperties = options_.contentProperties || {}
+          _content && !Array.isArray(_content) ? [_content] : _content
+
+        const contentProperties =
+          /** @type {ContentProperties} */ (
+            createFunction(options.contentProperties, node)
+          ) || {}
 
         if (absolute(url) && protocols.includes(protocol)) {
           if (target !== false) {
