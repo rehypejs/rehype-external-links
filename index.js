@@ -73,15 +73,6 @@ export default function rehypeExternalLinks(options = {}) {
         const url = node.properties.href
         const protocol = url.slice(0, url.indexOf(':'))
 
-        const options_ =
-          typeof options === 'function' ? options(node, tree) : options
-        const exclude = options_.exclude || []
-
-        // Rehype camelizes some properties and doesn't for some others, to gurantee compatibility
-        // and avoid edge cases, I'm camelizing everything manually,
-        const propertyKeys = new Set(
-          Object.keys(node.properties).map((x) => camelCase(x))
-        )
         const noExcludeProperties = exclude.every(
           (x) => !propertyKeys.has(camelCase(x))
         )
