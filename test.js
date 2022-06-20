@@ -204,8 +204,8 @@ test('rehypeExternalLinks', async (t) => {
           /** @type {import("./index.js").inputOptions} */ (
             (node) => {
               // True, If node doesn't contain an image
-              const noImage = node?.children?.every((x) => {
-                if (x.type === 'element') return x?.tagName !== 'img'
+              const noImage = node.children.every((x) => {
+                if (x.type === 'element') return x.tagName !== 'img'
                 return true
               })
               return {
@@ -234,9 +234,9 @@ test('rehypeExternalLinks', async (t) => {
           /** @type {import("./index.js").inputOptions} */ (
             (node, tree) => {
               // True, If parent node is a div
-              const divParent = tree?.children.some((x) => {
+              const divParent = tree.children.some((x) => {
                 if (x.type === 'element') {
-                  return x?.tagName === 'div' && x?.children?.includes(node)
+                  return x.tagName === 'div' && x.children.includes(node)
                 }
 
                 return false
@@ -268,8 +268,8 @@ test('rehypeExternalLinks', async (t) => {
           /** @type {import("./index.js").inputOptions} */ (
             (node) => {
               // True, If node doesn't contains an image
-              const noImage = !node?.children?.every((x) => {
-                if (x.type === 'element') return x?.tagName !== 'img'
+              const noImage = !node.children.every((x) => {
+                if (x.type === 'element') return x.tagName !== 'img'
                 return true
               })
 
@@ -299,8 +299,8 @@ test('rehypeExternalLinks', async (t) => {
           /** @type {import("./index.js").inputOptions} */ (
             (node) => {
               // True, If node doesn't contains an image
-              const noImage = node?.children?.every((x) => {
-                if (x.type === 'element') return x?.tagName !== 'img'
+              const noImage = node.children.every((x) => {
+                if (x.type === 'element') return x.tagName !== 'img'
                 return true
               })
               return {
