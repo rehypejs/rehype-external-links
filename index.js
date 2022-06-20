@@ -8,8 +8,6 @@
  *
  * @typedef Options
  *   Configuration.
- * @property {string[]} [exclude=[]]
- *   Exclude anchors with the following attributes from `rehype-external-links`
  * @property {'_self'|'_blank'|'_parent'|'_top'|false} [target='_blank']
  *   How to display referenced documents (`string?`: `_self`, `_blank`,
  *   `_parent`, or `_top`, default: `_blank`).
