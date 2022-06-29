@@ -54,7 +54,7 @@ test('rehypeExternalLinks', async (t) => {
         .use(rehypeExternalLinks)
         .process('<a href="http://example.com">http</a>')
     ),
-    '<a href="http://example.com" target="_blank" rel="nofollow noopener noreferrer">http</a>',
+    '<a href="http://example.com" rel="nofollow">http</a>',
     'should change a http link'
   )
 
@@ -65,7 +65,7 @@ test('rehypeExternalLinks', async (t) => {
         .use(rehypeExternalLinks)
         .process('<a href="https://example.com">https</a>')
     ),
-    '<a href="https://example.com" target="_blank" rel="nofollow noopener noreferrer">https</a>',
+    '<a href="https://example.com" rel="nofollow">https</a>',
     'should change a https link'
   )
 
@@ -87,7 +87,7 @@ test('rehypeExternalLinks', async (t) => {
         .use(rehypeExternalLinks, {target: false})
         .process('<a href="http://example.com">http</a>')
     ),
-    '<a href="http://example.com" rel="nofollow noopener noreferrer">http</a>',
+    '<a href="http://example.com" rel="nofollow">http</a>',
     'should not add a `[target]` w/ `target: false`'
   )
 
@@ -98,7 +98,7 @@ test('rehypeExternalLinks', async (t) => {
         .use(rehypeExternalLinks, {rel: false})
         .process('<a href="http://example.com">http</a>')
     ),
-    '<a href="http://example.com" target="_blank">http</a>',
+    '<a href="http://example.com">http</a>',
     'should not add a `[rel]` w/ `rel: false`'
   )
 
@@ -142,7 +142,7 @@ test('rehypeExternalLinks', async (t) => {
         .use(rehypeExternalLinks, {protocols: ['mailto']})
         .process('<a href="mailto:a@b.com">mailto</a>')
     ),
-    '<a href="mailto:a@b.com" target="_blank" rel="nofollow noopener noreferrer">mailto</a>',
+    '<a href="mailto:a@b.com" rel="nofollow">mailto</a>',
     'should support `mailto` protocols w/ `mailto` in `protocols`'
   )
 
@@ -155,7 +155,7 @@ test('rehypeExternalLinks', async (t) => {
         })
         .process('<a href="http://example.com">http</a>')
     ),
-    '<a href="http://example.com" target="_blank" rel="nofollow noopener noreferrer">http<span> (opens in a new window)</span></a>',
+    '<a href="http://example.com" rel="nofollow">http<span> (opens in a new window)</span></a>',
     'should add content at the end of the link w/ `content` as a single child'
   )
 
@@ -177,7 +177,7 @@ test('rehypeExternalLinks', async (t) => {
         })
         .process('<a href="http://example.com">http</a>')
     ),
-    '<a href="http://example.com" target="_blank" rel="nofollow noopener noreferrer">http<span> (<em>opens in a new window</em>)</span></a>',
+    '<a href="http://example.com" rel="nofollow">http<span> (<em>opens in a new window</em>)</span></a>',
     'should add content at the end of the link w/ `content` as an array of children'
   )
 
@@ -191,7 +191,7 @@ test('rehypeExternalLinks', async (t) => {
         })
         .process('<a href="http://example.com">http</a>')
     ),
-    '<a href="http://example.com" target="_blank" rel="nofollow noopener noreferrer">http<span class="alpha bravo"> (opens in a new window)</span></a>',
+    '<a href="http://example.com" rel="nofollow">http<span class="alpha bravo"> (opens in a new window)</span></a>',
     'should add properties to the span at the end of the link w/ `contentProperties`'
   )
 

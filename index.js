@@ -32,8 +32,8 @@ import {parse} from 'space-separated-tokens'
 import absolute from 'is-absolute-url'
 import extend from 'extend'
 
-const defaultTarget = '_blank'
-const defaultRel = ['nofollow', 'noopener', 'noreferrer']
+const defaultTarget = false
+const defaultRel = ['nofollow']
 const defaultProtocols = ['http', 'https']
 
 /**

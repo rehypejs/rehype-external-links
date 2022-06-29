@@ -117,7 +117,7 @@ Configuration (optional).
 ###### `options.target`
 
 How to open external documents (`string?`: `_self`, `_blank`, `_parent`,
-or `_top`, default: `_blank`).
+or `_top`, default: `false`).
 Pass `false` to not set `target`s on links.
 
 > 👉 **Note**: [you should likely pass `false`][css-tricks].
@@ -125,7 +125,7 @@ Pass `false` to not set `target`s on links.
 ###### `options.rel`
 
 [Link types][mdn-rel] to hint about the referenced documents (`Array<string>`
-or `string`, default: `['nofollow', 'noopener', 'noreferrer']`).
+or `string`, default: `['nofollow']`).
 Pass `false` to not set `rel`s on links.
 
 > 👉 **Note**: you should at least set `['nofollow']`.
