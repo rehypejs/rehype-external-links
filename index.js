@@ -65,11 +65,15 @@ const defaultRel = ['nofollow', 'noopener', 'noreferrer']
 const defaultProtocols = ['http', 'https']
 
 /**
+ * If this is a value, return that.
+ * If this is a function instead, call it to get the result.
  *
- * @param {Options[keyof Options]} value
+ * @template T
+ * @param {T} value
  * @param {Element} node
+ * @returns {T extends Function ? ReturnType<T> : T}
  */
-function createFunction(value, node) {
+function callIfNeeded(value, node) {
   return typeof value === 'function' ? value(node) : value
 }
 
@@ -89,27 +93,20 @@ export default function rehypeExternalLinks(options = {}) {
         const url = node.properties.href
         const protocol = url.slice(0, url.indexOf(':'))
 
-        const target = /** @type {Target} */ (
-          createFunction(options.target, node)
-        )
+        const target = callIfNeeded(options.target, node)
 
-        const _rel = /** @type {Rel} */ (createFunction(options.rel, node))
+        const _rel = callIfNeeded(options.rel, node)
         const rel = typeof _rel === 'string' ? parse(_rel) : _rel
 
         const protocols =
-          /** @type {Protocols} */ (createFunction(options.protocols, node)) ||
-          defaultProtocols
+          callIfNeeded(options.protocols, node) || defaultProtocols
 
-        const _content = /** @type {Content} */ (
-          createFunction(options.content, node)
-        )
+        const _content = callIfNeeded(options.content, node)
         const content =
           _content && !Array.isArray(_content) ? [_content] : _content
 
         const contentProperties =
-          /** @type {ContentProperties} */ (
-            createFunction(options.contentProperties, node)
-          ) || {}
+          callIfNeeded(options.contentProperties, node) || {}
 
         if (absolute(url) && protocols.includes(protocol)) {
           if (target !== false) {
