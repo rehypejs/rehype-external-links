@@ -216,7 +216,7 @@ test('rehypeExternalLinks', async (t) => {
           `<a href="http://example.com">http</a>\n<a href="http://example.com"><img src="./image.png" /></a>`
         )
     ),
-    `<a href="http://example.com" target="_blank" rel="nofollow noopener noreferrer">http<span class="alpha bravo"> (opens in a new window)</span></a>\n<a href="http://example.com" target="_blank" rel="nofollow noopener noreferrer"><img src="./image.png"></a>`,
+    `<a href="http://example.com" rel="nofollow">http<span class="alpha bravo"> (opens in a new window)</span></a>\n<a href="http://example.com" rel="nofollow"><img src="./image.png"></a>`,
     "should only add (open in window) text to the span at the end of the link w/ a `options(node)` function, whose node doesn't have an `img` element as a direct child"
   )
 
@@ -240,7 +240,7 @@ test('rehypeExternalLinks', async (t) => {
           `<a href="http://example.com">http</a>\n<a href="http://example.com"><img src="./image.png" /></a>`
         )
     ),
-    `<a href="http://example.com" target="_blank" rel="nofollow noopener noreferrer">http<span> (opens in a new window)</span></a>\n<a href="http://example.com" target="_blank" rel="nofollow noopener noreferrer"><img src="./image.png"><span class="alpha bravo"> (opens in a new window)</span></a>`,
+    `<a href="http://example.com" rel="nofollow">http<span> (opens in a new window)</span></a>\n<a href="http://example.com" rel="nofollow"><img src="./image.png"><span class="alpha bravo"> (opens in a new window)</span></a>`,
     "should only add 'alpha bravo' classes to the span at the end of the link w/ a `options(node)` function, whose node doesn't have an `img` element as a direct child"
   )
 
