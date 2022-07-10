@@ -195,5 +195,88 @@ test('rehypeExternalLinks', async (t) => {
     'should add properties to the span at the end of the link w/ `contentProperties`'
   )
 
+  t.equal(
+    String(
+      await rehype()
+        .use({settings: {fragment: true}})
+        .use(rehypeExternalLinks, {
+          contentProperties: {className: ['alpha', 'bravo']},
+          content(node) {
+            // True, If node doesn't contain an image
+            const noImage = node.children.every((x) => {
+              if (x.type === 'element') return x.tagName !== 'img'
+              return true
+            })
+
+            if (noImage)
+              return {type: 'text', value: ' (opens in a new window)'}
+          }
+        })
+        .process(
+          `<a href="http://example.com">http</a>\n<a href="http://example.com"><img src="./image.png" /></a>`
+        )
+    ),
+    `<a href="http://example.com" rel="nofollow">http<span class="alpha bravo"> (opens in a new window)</span></a>\n<a href="http://example.com" rel="nofollow"><img src="./image.png"></a>`,
+    "should only add (open in window) text to the span at the end of the link w/ a `options(node)` function, whose node doesn't have an `img` element as a direct child"
+  )
+
+  t.equal(
+    String(
+      await rehype()
+        .use({settings: {fragment: true}})
+        .use(rehypeExternalLinks, {
+          contentProperties(node) {
+            // True, If node doesn't contains an image
+            const noImage = !node.children.every((x) => {
+              if (x.type === 'element') return x.tagName !== 'img'
+              return true
+            })
+
+            if (noImage) return {className: ['alpha', 'bravo']}
+          },
+          content: {type: 'text', value: ' (opens in a new window)'}
+        })
+        .process(
+          `<a href="http://example.com">http</a>\n<a href="http://example.com"><img src="./image.png" /></a>`
+        )
+    ),
+    `<a href="http://example.com" rel="nofollow">http<span> (opens in a new window)</span></a>\n<a href="http://example.com" rel="nofollow"><img src="./image.png"><span class="alpha bravo"> (opens in a new window)</span></a>`,
+    "should only add 'alpha bravo' classes to the span at the end of the link w/ a `options(node)` function, whose node doesn't have an `img` element as a direct child"
+  )
+
+  t.equal(
+    String(
+      await rehype()
+        .use({settings: {fragment: true}})
+        .use(rehypeExternalLinks, {
+          target(node) {
+            // True, If node doesn't contains an image
+            const noImage = node.children.every((x) => {
+              if (x.type === 'element') return x.tagName !== 'img'
+              return true
+            })
+
+            return noImage ? '_blank' : false
+          },
+          rel(node) {
+            // True, If node doesn't contains an image
+            const noImage = node.children.every((x) => {
+              if (x.type === 'element') return x.tagName !== 'img'
+              return true
+            })
+
+            return noImage ? ['noopener', 'noreferrer'] : 'nofollow'
+          },
+          contentProperties: {className: ['alpha', 'bravo']},
+          content: {type: 'text', value: ' (opens in a new window)'}
+        })
+        .process(
+          `<a href="http://example.com">http</a>\n<a href="http://example.com"><img src="./image.png" /></a>`
+        )
+    ),
+    `<a href="http://example.com" target="_blank" rel="noopener noreferrer">http<span class="alpha bravo"> (opens in a new window)</span></a>\n<a href="http://example.com" rel="nofollow"><img src="./image.png"><span class="alpha bravo"> (opens in a new window)</span></a>`,
+    "should only add 'alpha bravo' classes to the span at the end of the link w/ `options(node)` function, whose node doesn't have an `img` element as a direct child"
+  )
+
   t.end()
 })

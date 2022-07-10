@@ -113,6 +113,28 @@ Add `rel` (and `target`) to external links.
 ##### `options`
 
 Configuration (optional).
+Each config option can also be a callback function which has
+a node as an argument, and returns the corresponding config values.
+
+e.g.
+
+```ts
+{
+  target(node) {
+    return node.properties.id == 5 ? "_blank" : false;
+  }
+}
+...
+```
+
+Or
+
+```ts
+{
+  target: "_blank"
+}
+...
+```
 
 ###### `options.target`
 

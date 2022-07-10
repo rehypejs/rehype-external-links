@@ -1,29 +1,57 @@
 /**
  * @typedef {import('hast').Root} Root
  * @typedef {import('hast').Properties} Properties
- * @typedef {import('hast').Element['children'][number]} ElementChild
+ * @typedef {import('hast').Element} Element
+ *
+ * @typedef {Element['children'][number]} ElementChild
+ *
+ * @typedef {'_self'|'_blank'|'_parent'|'_top'|false} Target
+ * @typedef {Array<string>|string|false} Rel
+ * @typedef {Array<string>} Protocols
+ * @typedef {ElementChild|Array<ElementChild>} Content
+ * @typedef {Properties} ContentProperties
+ *
+ * @callback TargetCallback
+ * @param {Element} node
+ * @returns {Target|null|undefined}
+ *
+ * @callback RelCallback
+ * @param {Element} node
+ * @returns {Rel|null|undefined}
+ *
+ * @callback ProtocolsCallback
+ * @param {Element} node
+ * @returns {Protocols|null|undefined}
+ *
+ * @callback ContentCallback
+ * @param {Element} node
+ * @returns {Content|null|undefined}
+ *
+ * @callback ContentPropertiesCallback
+ * @param {Element} node
+ * @returns {Properties|null|undefined}
  *
  * @typedef Options
  *   Configuration.
- * @property {'_self'|'_blank'|'_parent'|'_top'|false} [target='_blank']
+ * @property {Target|TargetCallback} [target='_blank']
  *   How to display referenced documents (`string?`: `_self`, `_blank`,
  *   `_parent`, or `_top`, default: `_blank`).
  *   Pass `false` to not set `target`s on links.
- * @property {Array<string>|string|false} [rel=['nofollow', 'noopener', 'noreferrer']]
+ * @property {Rel|RelCallback} [rel=['nofollow', 'noopener', 'noreferrer']]
  *   Link types to hint about the referenced documents.
  *   Pass `false` to not set `rel`s on links.
  *
  *   **Note**: when using a `target`, add `noopener` and `noreferrer` to avoid
  *   exploitation of the `window.opener` API.
- * @property {Array<string>} [protocols=['http', 'https']]
+ * @property {Protocols|ProtocolsCallback} [protocols=['http', 'https']]
  *   Protocols to check, such as `mailto` or `tel`.
- * @property {ElementChild|Array<ElementChild>} [content]
+ * @property {Content|ContentCallback} [content]
  *   hast content to insert at the end of external links.
  *   Will be inserted in a `<span>` element.
  *
  *   Useful for improving accessibility by giving users advanced warning when
  *   opening a new window.
- * @property {Properties} [contentProperties]
+ * @property {ContentProperties|ContentPropertiesCallback} [contentProperties]
  *   hast properties to add to the `span` wrapping `content`, when given.
  */
 
@@ -37,20 +65,24 @@ const defaultRel = ['nofollow']
 const defaultProtocols = ['http', 'https']
 
 /**
+ * If this is a value, return that.
+ * If this is a function instead, call it to get the result.
+ *
+ * @template T
+ * @param {T} value
+ * @param {Element} node
+ * @returns {T extends Function ? ReturnType<T> : T}
+ */
+function callIfNeeded(value, node) {
+  return typeof value === 'function' ? value(node) : value
+}
+
+/**
  * Plugin to automatically add `target` and `rel` attributes to external links.
  *
  * @type {import('unified').Plugin<[Options?] | Array<void>, Root>}
  */
 export default function rehypeExternalLinks(options = {}) {
-  const target = options.target
-  const rel = typeof options.rel === 'string' ? parse(options.rel) : options.rel
-  const protocols = options.protocols || defaultProtocols
-  const content =
-    options.content && !Array.isArray(options.content)
-      ? [options.content]
-      : options.content
-  const contentProperties = options.contentProperties || {}
-
   return (tree) => {
     visit(tree, 'element', (node) => {
       if (
@@ -60,6 +92,21 @@ export default function rehypeExternalLinks(options = {}) {
       ) {
         const url = node.properties.href
         const protocol = url.slice(0, url.indexOf(':'))
+
+        const target = callIfNeeded(options.target, node)
+
+        const _rel = callIfNeeded(options.rel, node)
+        const rel = typeof _rel === 'string' ? parse(_rel) : _rel
+
+        const protocols =
+          callIfNeeded(options.protocols, node) || defaultProtocols
+
+        const _content = callIfNeeded(options.content, node)
+        const content =
+          _content && !Array.isArray(_content) ? [_content] : _content
+
+        const contentProperties =
+          callIfNeeded(options.contentProperties, node) || {}
 
         if (absolute(url) && protocols.includes(protocol)) {
           if (target !== false) {
