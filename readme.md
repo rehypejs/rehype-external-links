@@ -18,6 +18,8 @@
 *   [Use](#use)
 *   [API](#api)
     *   [`unified().use(rehypeExternalLinks[, options])`](#unifieduserehypeexternallinks-options)
+*   [Examples](#examples)
+    *   [Example: dynamic options](#example-dynamic-options)
 *   [Types](#types)
 *   [Compatibility](#compatibility)
 *   [Security](#security)
@@ -81,18 +83,14 @@ import remarkRehype from 'remark-rehype'
 import rehypeExternalLinks from 'rehype-external-links'
 import rehypeStringify from 'rehype-stringify'
 
-main()
+const file = await unified()
+  .use(remarkParse)
+  .use(remarkRehype)
+  .use(rehypeExternalLinks, {target: false, rel: ['nofollow']})
+  .use(rehypeStringify)
+  .process('[rehype](https://github.com/rehypejs/rehype)')
 
-async function main() {
-  const file = await unified()
-    .use(remarkParse)
-    .use(remarkRehype)
-    .use(rehypeExternalLinks, {target: false, rel: ['nofollow']})
-    .use(rehypeStringify)
-    .process('[rehype](https://github.com/rehypejs/rehype)')
-
-  console.log(String(file))
-}
+console.log(String(file))
 ```
 
 Now running `node example.js` yields:
@@ -113,33 +111,13 @@ Add `rel` (and `target`) to external links.
 ##### `options`
 
 Configuration (optional).
-Each config option can also be a callback function which has
-a node as an argument, and returns the corresponding config values.
-
-e.g.
-
-```ts
-{
-  target(node) {
-    return node.properties.id == 5 ? "_blank" : false;
-  }
-}
-...
-```
-
-Or
-
-```ts
-{
-  target: "_blank"
-}
-...
-```
 
 ###### `options.target`
 
 How to open external documents (`string?`: `_self`, `_blank`, `_parent`,
 or `_top`, default: `false`).
+Can also be a function called with the current element to get `target`
+dynamically.
 Pass `false` to not set `target`s on links.
 
 > 👉 **Note**: [you should likely pass `false`][css-tricks].
@@ -148,6 +126,7 @@ Pass `false` to not set `target`s on links.
 
 [Link types][mdn-rel] to hint about the referenced documents (`Array<string>`
 or `string`, default: `['nofollow']`).
+Can also be a function called with the current element to get `rel` dynamically.
 Pass `false` to not set `rel`s on links.
 
 > 👉 **Note**: you should at least set `['nofollow']`.
@@ -159,12 +138,16 @@ Pass `false` to not set `rel`s on links.
 
 Protocols to see as external, such as `mailto` or `tel` (`Array<string>`,
 default: `['http', 'https']`).
+Can also be a function called with the current element to get `protocols`
+dynamically.
 
 ###### `options.content`
 
 **[hast][]** content to insert at the end of external links ([`Node`][node] or
 [`Children`][children], optional).
-Will be inserted in a `<span>` element.
+Can also be a function called with the current element to get `content`
+dynamically.
+The content will be inserted in a `<span>` element.
 
 > 👉 **Note**: you should set this when using `target` to adhere to
 > accessibility guidelines by [giving users advanced warning when opening a new
@@ -174,6 +157,39 @@ Will be inserted in a `<span>` element.
 
 Attributes to add to the `<span>`s wrapping `options.content`
 ([`Properties`][properties], optional).
+Can also be a function called with the current element to get
+`contentProperties` dynamically.
+
+## Examples
+
+### Example: dynamic options
+
+This example shows how to define options dynamically.
+That means that you can choose per element what to generate.
+
+Each option can be a function which is called with the current element
+(`Element`) and returns the corresponding value.
+
+Taking the above `example.js` and applying the following diff:
+
+```diff
+ const file = await unified()
+   .use(remarkParse)
+   .use(remarkRehype)
+-  .use(rehypeExternalLinks, {target: false, rel: ['nofollow']})
++  .use(rehypeExternalLinks, {
++    target(element) {
++      return element.properties && element.properties.id === '5'
++        ? '_blank'
++        : false
++    },
++    rel: ['nofollow']
++  })
+   .use(rehypeStringify)
+   .process('[rehype](https://github.com/rehypejs/rehype)')
+```
+
+Changes to only apply `target="_blank"` on the element with an `id="5"`.
 
 ## Types
 
