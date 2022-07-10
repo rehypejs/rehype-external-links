@@ -95,18 +95,18 @@ test('rehypeExternalLinks', async (t) => {
     String(
       await rehype()
         .use({settings: {fragment: true}})
-        .use(rehypeExternalLinks, {rel: false})
+        .use(rehypeExternalLinks, {rel: []})
         .process('<a href="http://example.com">http</a>')
     ),
     '<a href="http://example.com">http</a>',
-    'should not add a `[rel]` w/ `rel: false`'
+    'should not add a `[rel]` w/ `rel: []`'
   )
 
   t.equal(
     String(
       await rehype()
         .use({settings: {fragment: true}})
-        .use(rehypeExternalLinks, {target: '_parent', rel: false})
+        .use(rehypeExternalLinks, {target: '_parent', rel: []})
         .process('<a href="http://example.com">http</a>')
     ),
     '<a href="http://example.com" target="_parent">http</a>',

@@ -127,7 +127,7 @@ The default (nothing) is to not set `target`s on links.
 [Link types][mdn-rel] to hint about the referenced documents (`Array<string>`
 or `string`, default: `['nofollow']`).
 Can also be a function called with the current element to get `rel` dynamically.
-Pass `false` to not set `rel`s on links.
+Pass an empty array (`[]`) to not set `rel`s on links.
 
 > 👉 **Note**: you should at least set `['nofollow']`.
 
@@ -181,7 +181,7 @@ Taking the above `example.js` and applying the following diff:
 +    target(element) {
 +      return element.properties && element.properties.id === '5'
 +        ? '_blank'
-+        : false
++        : undefined
 +    },
 +    rel: ['nofollow']
 +  })

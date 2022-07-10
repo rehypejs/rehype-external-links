@@ -6,7 +6,7 @@
  * @typedef {Element['children'][number]} ElementChild
  *
  * @typedef {'_self'|'_blank'|'_parent'|'_top'} Target
- * @typedef {Array<string>|string|false} Rel
+ * @typedef {Array<string>|string} Rel
  * @typedef {Array<string>} Protocols
  * @typedef {ElementChild|Array<ElementChild>} Content
  * @typedef {Properties} ContentProperties
@@ -39,7 +39,7 @@
  *   The default (nothing) is to not set `target`s on links.
  * @property {Rel|RelCallback} [rel=['nofollow', 'noopener', 'noreferrer']]
  *   Link types to hint about the referenced documents.
- *   Pass `false` to not set `rel`s on links.
+ *   Pass an empty array (`[]`) to not set `rel`s on links.
  *
  *   **Note**: when using a `target`, add `noopener` and `noreferrer` to avoid
  *   exploitation of the `window.opener` API.
@@ -94,7 +94,7 @@ export default function rehypeExternalLinks(options = {}) {
 
         const target = callIfNeeded(options.target, node)
 
-        const relRaw = callIfNeeded(options.rel, node)
+        const relRaw = callIfNeeded(options.rel, node) || defaultRel
         const rel = typeof relRaw === 'string' ? parse(relRaw) : relRaw
 
         const protocols =
@@ -112,8 +112,8 @@ export default function rehypeExternalLinks(options = {}) {
             node.properties.target = target
           }
 
-          if (rel !== false) {
-            node.properties.rel = (rel || defaultRel).concat()
+          if (rel.length > 0) {
+            node.properties.rel = rel.concat()
           }
 
           if (content) {
