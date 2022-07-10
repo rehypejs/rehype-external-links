@@ -1,3 +1,7 @@
+/**
+ * @typedef {import('hast').Element} Element
+ */
+
 import test from 'tape'
 import {rehype} from 'rehype'
 import rehypeExternalLinks from './index.js'
@@ -202,22 +206,17 @@ test('rehypeExternalLinks', async (t) => {
         .use(rehypeExternalLinks, {
           contentProperties: {className: ['alpha', 'bravo']},
           content(node) {
-            // True, If node doesn't contain an image
-            const noImage = node.children.every((x) => {
-              if (x.type === 'element') return x.tagName !== 'img'
-              return true
-            })
-
-            if (noImage)
+            if (!hasDirectImageChild(node)) {
               return {type: 'text', value: ' (opens in a new window)'}
+            }
           }
         })
         .process(
-          `<a href="http://example.com">http</a>\n<a href="http://example.com"><img src="./image.png" /></a>`
+          '<a href="http://example.com">http</a>\n<a href="http://example.com"><img src="./image.png" /></a>'
         )
     ),
-    `<a href="http://example.com" rel="nofollow">http<span class="alpha bravo"> (opens in a new window)</span></a>\n<a href="http://example.com" rel="nofollow"><img src="./image.png"></a>`,
-    "should only add (open in window) text to the span at the end of the link w/ a `options(node)` function, whose node doesn't have an `img` element as a direct child"
+    '<a href="http://example.com" rel="nofollow">http<span class="alpha bravo"> (opens in a new window)</span></a>\n<a href="http://example.com" rel="nofollow"><img src="./image.png"></a>',
+    'should add dynamic `content` to links'
   )
 
   t.equal(
@@ -226,22 +225,18 @@ test('rehypeExternalLinks', async (t) => {
         .use({settings: {fragment: true}})
         .use(rehypeExternalLinks, {
           contentProperties(node) {
-            // True, If node doesn't contains an image
-            const noImage = !node.children.every((x) => {
-              if (x.type === 'element') return x.tagName !== 'img'
-              return true
-            })
-
-            if (noImage) return {className: ['alpha', 'bravo']}
+            if (!hasDirectImageChild(node)) {
+              return {className: ['alpha', 'bravo']}
+            }
           },
           content: {type: 'text', value: ' (opens in a new window)'}
         })
         .process(
-          `<a href="http://example.com">http</a>\n<a href="http://example.com"><img src="./image.png" /></a>`
+          '<a href="http://example.com">http</a>\n<a href="http://example.com"><img src="./image.png" /></a>'
         )
     ),
-    `<a href="http://example.com" rel="nofollow">http<span> (opens in a new window)</span></a>\n<a href="http://example.com" rel="nofollow"><img src="./image.png"><span class="alpha bravo"> (opens in a new window)</span></a>`,
-    "should only add 'alpha bravo' classes to the span at the end of the link w/ a `options(node)` function, whose node doesn't have an `img` element as a direct child"
+    '<a href="http://example.com" rel="nofollow">http<span class="alpha bravo"> (opens in a new window)</span></a>\n<a href="http://example.com" rel="nofollow"><img src="./image.png"><span> (opens in a new window)</span></a>',
+    'should add dynamic `contentProperties` to links'
   )
 
   t.equal(
@@ -250,33 +245,32 @@ test('rehypeExternalLinks', async (t) => {
         .use({settings: {fragment: true}})
         .use(rehypeExternalLinks, {
           target(node) {
-            // True, If node doesn't contains an image
-            const noImage = node.children.every((x) => {
-              if (x.type === 'element') return x.tagName !== 'img'
-              return true
-            })
-
-            return noImage ? '_blank' : undefined
+            if (!hasDirectImageChild(node)) {
+              return '_blank'
+            }
           },
           rel(node) {
-            // True, If node doesn't contains an image
-            const noImage = node.children.every((x) => {
-              if (x.type === 'element') return x.tagName !== 'img'
-              return true
-            })
-
-            return noImage ? ['noopener', 'noreferrer'] : 'nofollow'
+            return hasDirectImageChild(node)
+              ? 'nofollow'
+              : ['noopener', 'noreferrer']
           },
           contentProperties: {className: ['alpha', 'bravo']},
           content: {type: 'text', value: ' (opens in a new window)'}
         })
         .process(
-          `<a href="http://example.com">http</a>\n<a href="http://example.com"><img src="./image.png" /></a>`
+          '<a href="http://example.com">http</a>\n<a href="http://example.com"><img src="./image.png" /></a>'
         )
     ),
-    `<a href="http://example.com" target="_blank" rel="noopener noreferrer">http<span class="alpha bravo"> (opens in a new window)</span></a>\n<a href="http://example.com" rel="nofollow"><img src="./image.png"><span class="alpha bravo"> (opens in a new window)</span></a>`,
-    "should only add 'alpha bravo' classes to the span at the end of the link w/ `options(node)` function, whose node doesn't have an `img` element as a direct child"
+    '<a href="http://example.com" target="_blank" rel="noopener noreferrer">http<span class="alpha bravo"> (opens in a new window)</span></a>\n<a href="http://example.com" rel="nofollow"><img src="./image.png"><span class="alpha bravo"> (opens in a new window)</span></a>',
+    'should add dynamic `target`, `rel` to links'
   )
 
   t.end()
 })
+
+/**
+ * @param {Element} node
+ */
+function hasDirectImageChild(node) {
+  return node.children.some((d) => d.type === 'element' && d.tagName === 'img')
+}
