@@ -95,15 +95,15 @@ export default function rehypeExternalLinks(options = {}) {
 
         const target = callIfNeeded(options.target, node)
 
-        const _rel = callIfNeeded(options.rel, node)
-        const rel = typeof _rel === 'string' ? parse(_rel) : _rel
+        const relRaw = callIfNeeded(options.rel, node)
+        const rel = typeof relRaw === 'string' ? parse(relRaw) : relRaw
 
         const protocols =
           callIfNeeded(options.protocols, node) || defaultProtocols
 
-        const _content = callIfNeeded(options.content, node)
+        const contentRaw = callIfNeeded(options.content, node)
         const content =
-          _content && !Array.isArray(_content) ? [_content] : _content
+          contentRaw && !Array.isArray(contentRaw) ? [contentRaw] : contentRaw
 
         const contentProperties =
           callIfNeeded(options.contentProperties, node) || {}
