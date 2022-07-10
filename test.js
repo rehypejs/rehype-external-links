@@ -84,11 +84,11 @@ test('rehypeExternalLinks', async (t) => {
     String(
       await rehype()
         .use({settings: {fragment: true}})
-        .use(rehypeExternalLinks, {target: false})
+        .use(rehypeExternalLinks)
         .process('<a href="http://example.com">http</a>')
     ),
     '<a href="http://example.com" rel="nofollow">http</a>',
-    'should not add a `[target]` w/ `target: false`'
+    'should not add a `[target]` by default'
   )
 
   t.equal(
@@ -110,29 +110,29 @@ test('rehypeExternalLinks', async (t) => {
         .process('<a href="http://example.com">http</a>')
     ),
     '<a href="http://example.com" target="_parent">http</a>',
-    'should not add a `[target]` w/ `target` set to a known target'
+    'should add a `[target]` w/ `target` set to a known target'
   )
 
   t.equal(
     String(
       await rehype()
         .use({settings: {fragment: true}})
-        .use(rehypeExternalLinks, {target: false, rel: 'nofollow'})
+        .use(rehypeExternalLinks, {rel: 'nofollow'})
         .process('<a href="http://example.com">http</a>')
     ),
     '<a href="http://example.com" rel="nofollow">http</a>',
-    'should not add a `[rel]` w/ `rel` set to a string'
+    'should add a `[rel]` w/ `rel` set to a string'
   )
 
   t.equal(
     String(
       await rehype()
         .use({settings: {fragment: true}})
-        .use(rehypeExternalLinks, {target: false, rel: ['nofollow']})
+        .use(rehypeExternalLinks, {rel: ['nofollow']})
         .process('<a href="http://example.com">http</a>')
     ),
     '<a href="http://example.com" rel="nofollow">http</a>',
-    'should not add a `[rel]` w/ `rel` set to an array'
+    'should add a `[rel]` w/ `rel` set to an array'
   )
 
   t.equal(
@@ -256,7 +256,7 @@ test('rehypeExternalLinks', async (t) => {
               return true
             })
 
-            return noImage ? '_blank' : false
+            return noImage ? '_blank' : undefined
           },
           rel(node) {
             // True, If node doesn't contains an image

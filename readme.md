@@ -86,7 +86,7 @@ import rehypeStringify from 'rehype-stringify'
 const file = await unified()
   .use(remarkParse)
   .use(remarkRehype)
-  .use(rehypeExternalLinks, {target: false, rel: ['nofollow']})
+  .use(rehypeExternalLinks, {rel: ['nofollow']})
   .use(rehypeStringify)
   .process('[rehype](https://github.com/rehypejs/rehype)')
 
@@ -115,12 +115,12 @@ Configuration (optional).
 ###### `options.target`
 
 How to open external documents (`string?`: `_self`, `_blank`, `_parent`,
-or `_top`, default: `false`).
+or `_top`, default: `undefined`).
 Can also be a function called with the current element to get `target`
 dynamically.
-Pass `false` to not set `target`s on links.
+The default (nothing) is to not set `target`s on links.
 
-> 👉 **Note**: [you should likely pass `false`][css-tricks].
+> 👉 **Note**: [you should likely not configure this][css-tricks].
 
 ###### `options.rel`
 
@@ -176,7 +176,7 @@ Taking the above `example.js` and applying the following diff:
  const file = await unified()
    .use(remarkParse)
    .use(remarkRehype)
--  .use(rehypeExternalLinks, {target: false, rel: ['nofollow']})
+-  .use(rehypeExternalLinks, {rel: ['nofollow']})
 +  .use(rehypeExternalLinks, {
 +    target(element) {
 +      return element.properties && element.properties.id === '5'
@@ -189,7 +189,7 @@ Taking the above `example.js` and applying the following diff:
    .process('[rehype](https://github.com/rehypejs/rehype)')
 ```
 
-Changes to only apply `target="_blank"` on the element with an `id="5"`.
+Changes to apply `target="_blank"` on the element with an `id="5"`.
 
 ## Types
 

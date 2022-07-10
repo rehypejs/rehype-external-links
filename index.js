@@ -5,7 +5,7 @@
  *
  * @typedef {Element['children'][number]} ElementChild
  *
- * @typedef {'_self'|'_blank'|'_parent'|'_top'|false} Target
+ * @typedef {'_self'|'_blank'|'_parent'|'_top'} Target
  * @typedef {Array<string>|string|false} Rel
  * @typedef {Array<string>} Protocols
  * @typedef {ElementChild|Array<ElementChild>} Content
@@ -33,10 +33,10 @@
  *
  * @typedef Options
  *   Configuration.
- * @property {Target|TargetCallback} [target='_blank']
+ * @property {Target|TargetCallback} [target]
  *   How to display referenced documents (`string?`: `_self`, `_blank`,
  *   `_parent`, or `_top`, default: `_blank`).
- *   Pass `false` to not set `target`s on links.
+ *   The default (nothing) is to not set `target`s on links.
  * @property {Rel|RelCallback} [rel=['nofollow', 'noopener', 'noreferrer']]
  *   Link types to hint about the referenced documents.
  *   Pass `false` to not set `rel`s on links.
@@ -60,7 +60,6 @@ import {parse} from 'space-separated-tokens'
 import absolute from 'is-absolute-url'
 import extend from 'extend'
 
-const defaultTarget = false
 const defaultRel = ['nofollow']
 const defaultProtocols = ['http', 'https']
 
@@ -109,8 +108,8 @@ export default function rehypeExternalLinks(options = {}) {
           callIfNeeded(options.contentProperties, node) || {}
 
         if (absolute(url) && protocols.includes(protocol)) {
-          if (target !== false) {
-            node.properties.target = target || defaultTarget
+          if (target) {
+            node.properties.target = target
           }
 
           if (rel !== false) {
