@@ -1,6 +1,6 @@
 {
   "name": "rehype-external-links",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "rehype plugin to automatically add `target` and `rel` attributes to external links",
   "license": "MIT",
   "keywords": [
