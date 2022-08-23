@@ -56,6 +56,17 @@ test('rehypeExternalLinks', async (t) => {
       await rehype()
         .use({settings: {fragment: true}})
         .use(rehypeExternalLinks)
+        .process('<a href="//example.com">?</a>')
+    ),
+    '<a href="//example.com" rel="nofollow">?</a>',
+    'should change a protocol-relative link'
+  )
+
+  t.equal(
+    String(
+      await rehype()
+        .use({settings: {fragment: true}})
+        .use(rehypeExternalLinks)
         .process('<a href="http://example.com">http</a>')
     ),
     '<a href="http://example.com" rel="nofollow">http</a>',

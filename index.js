@@ -57,7 +57,7 @@
 
 import {visit} from 'unist-util-visit'
 import {parse} from 'space-separated-tokens'
-import absolute from 'is-absolute-url'
+import isAbsoluteUrl from 'is-absolute-url'
 import extend from 'extend'
 
 const defaultRel = ['nofollow']
@@ -107,7 +107,11 @@ export default function rehypeExternalLinks(options = {}) {
         const contentProperties =
           callIfNeeded(options.contentProperties, node) || {}
 
-        if (absolute(url) && protocols.includes(protocol)) {
+        if (
+          isAbsoluteUrl(url)
+            ? protocols.includes(protocol)
+            : url.startsWith('//')
+        ) {
           if (target) {
             node.properties.target = target
           }
