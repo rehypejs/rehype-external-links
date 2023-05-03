@@ -160,6 +160,15 @@ Attributes to add to the `<span>`s wrapping `options.content`
 Can also be a function called with the current element to get
 `contentProperties` dynamically.
 
+###### `options.test`
+
+Additional test to define which external link elements are modified.
+Any test that can be given to [hast-util-is-element](https://github.com/syntax-tree/hast-util-is-element)
+is supported.  The default (no test) is to modify all external links.
+
+> 👉 **Note**: in this case it only makes sense to provide a test function
+> since this plugin will only consider `a` tags.
+
 ## Examples
 
 ### Example: dynamic options
