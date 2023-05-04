@@ -281,7 +281,8 @@ test('rehypeExternalLinks', async (t) => {
       await rehype()
         .use({settings: {fragment: true}})
         .use(rehypeExternalLinks, {
-          test: (node) => node.properties && node.properties.href === 'http://example.com'
+          test: (node) =>
+            node.properties && node.properties.href === 'http://example.com'
         })
         .process('<a href="http://example.com">http</a>')
     ),
@@ -294,7 +295,8 @@ test('rehypeExternalLinks', async (t) => {
       await rehype()
         .use({settings: {fragment: true}})
         .use(rehypeExternalLinks, {
-          test: (node) => node.properties && node.properties.href === 'http://foobar.com'
+          test: (node) =>
+            node.properties && node.properties.href === 'http://foobar.com'
         })
         .process('<a href="http://example.com">http</a>')
     ),
