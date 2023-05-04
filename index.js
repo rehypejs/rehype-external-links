@@ -88,12 +88,15 @@ function callIfNeeded(value, node) {
  * @type {import('unified').Plugin<[Options?] | Array<void>, Root>}
  */
 export default function rehypeExternalLinks(options = {}) {
+  const is = convertElement(options.test)
+
   return (tree) => {
     visit(tree, 'element', (node, index, parent) => {
       if (
         node.tagName === 'a' &&
         node.properties &&
-        typeof node.properties.href === 'string'
+        typeof node.properties.href === 'string' &&
+        is(node, index, parent)
       ) {
         const url = node.properties.href
         const protocol = url.slice(0, url.indexOf(':'))
@@ -113,13 +116,10 @@ export default function rehypeExternalLinks(options = {}) {
         const contentProperties =
           callIfNeeded(options.contentProperties, node) || {}
 
-        const is = convertElement(options.test)
-
         if (
-          (isAbsoluteUrl(url)
+          isAbsoluteUrl(url)
             ? protocols.includes(protocol)
-            : url.startsWith('//')) &&
-          is(node, index, parent)
+            : url.startsWith('//')
         ) {
           if (target) {
             node.properties.target = target
