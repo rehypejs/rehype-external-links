@@ -276,6 +276,34 @@ test('rehypeExternalLinks', async (t) => {
     'should add dynamic `target`, `rel` to links'
   )
 
+  t.equal(
+    String(
+      await rehype()
+        .use({settings: {fragment: true}})
+        .use(rehypeExternalLinks, {
+          test: (node) =>
+            node.properties && node.properties.href === 'http://example.com'
+        })
+        .process('<a href="http://example.com">http</a>')
+    ),
+    '<a href="http://example.com" rel="nofollow">http</a>',
+    'should add rel to a link that matches the test function'
+  )
+
+  t.equal(
+    String(
+      await rehype()
+        .use({settings: {fragment: true}})
+        .use(rehypeExternalLinks, {
+          test: (node) =>
+            node.properties && node.properties.href === 'http://foobar.com'
+        })
+        .process('<a href="http://example.com">http</a>')
+    ),
+    '<a href="http://example.com">http</a>',
+    'should not add rel to a link that does not match the test function'
+  )
+
   t.end()
 })
 

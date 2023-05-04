@@ -2,6 +2,7 @@
  * @typedef {import('hast').Root} Root
  * @typedef {import('hast').Properties} Properties
  * @typedef {import('hast').Element} Element
+ * @typedef {import('hast-util-is-element').Test} Test
  *
  * @typedef {Element['children'][number]} ElementChild
  *
@@ -53,10 +54,15 @@
  *   opening a new window.
  * @property {ContentProperties|ContentPropertiesCallback} [contentProperties]
  *   hast properties to add to the `span` wrapping `content`, when given.
+ * @property {Test} [test]
+ *   Additional test to define which external link elements are modified.
+ *   Any test that can be given to `hast-util-is-element` is supported.
+ *   The default (no test) is to modify all external links.
  */
 
 import {visit} from 'unist-util-visit'
 import {parse} from 'space-separated-tokens'
+import {convertElement} from 'hast-util-is-element'
 import isAbsoluteUrl from 'is-absolute-url'
 import extend from 'extend'
 
@@ -82,12 +88,15 @@ function callIfNeeded(value, node) {
  * @type {import('unified').Plugin<[Options?] | Array<void>, Root>}
  */
 export default function rehypeExternalLinks(options = {}) {
+  const is = convertElement(options.test)
+
   return (tree) => {
-    visit(tree, 'element', (node) => {
+    visit(tree, 'element', (node, index, parent) => {
       if (
         node.tagName === 'a' &&
         node.properties &&
-        typeof node.properties.href === 'string'
+        typeof node.properties.href === 'string' &&
+        is(node, index, parent)
       ) {
         const url = node.properties.href
         const protocol = url.slice(0, url.indexOf(':'))
