@@ -36,7 +36,7 @@
   "dependencies": {
     "@types/hast": "^2.0.0",
     "extend": "^3.0.0",
-    "hast-util-is-element": "^2.1.3",
+    "hast-util-is-element": "^2.0.0",
     "is-absolute-url": "^4.0.0",
     "space-separated-tokens": "^2.0.0",
     "unified": "^10.0.0",
@@ -52,8 +52,8 @@
     "rimraf": "^3.0.0",
     "tape": "^5.0.0",
     "type-coverage": "^2.0.0",
-    "typescript": "^4.0.0",
-    "xo": "^0.51.0"
+    "typescript": "^5.0.0",
+    "xo": "^0.54.0"
   },
   "scripts": {
     "build": "rimraf \"*.d.ts\" && tsc && type-coverage",
