@@ -62,9 +62,9 @@
 
 import {visit} from 'unist-util-visit'
 import {parse} from 'space-separated-tokens'
+import {convertElement} from 'hast-util-is-element'
 import isAbsoluteUrl from 'is-absolute-url'
 import extend from 'extend'
-import {convertElement} from 'hast-util-is-element'
 
 const defaultRel = ['nofollow']
 const defaultProtocols = ['http', 'https']
