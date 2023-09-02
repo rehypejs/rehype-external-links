@@ -64,7 +64,7 @@ import {visit} from 'unist-util-visit'
 import {parse} from 'space-separated-tokens'
 import {convertElement} from 'hast-util-is-element'
 import isAbsoluteUrl from 'is-absolute-url'
-import extend from 'extend'
+import structuredClone from '@ungap/structured-clone'
 
 const defaultRel = ['nofollow']
 const defaultProtocols = ['http', 'https']
@@ -133,8 +133,8 @@ export default function rehypeExternalLinks(options = {}) {
             node.children.push({
               type: 'element',
               tagName: 'span',
-              properties: extend(true, contentProperties),
-              children: extend(true, content)
+              properties: structuredClone(contentProperties),
+              children: structuredClone(content)
             })
           }
         }
