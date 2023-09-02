@@ -8,6 +8,12 @@ import {rehype} from 'rehype'
 import rehypeExternalLinks from './index.js'
 
 test('rehypeExternalLinks', async function (t) {
+  await t.test('should expose the public api', async function () {
+    assert.deepEqual(Object.keys(await import('./index.js')).sort(), [
+      'default'
+    ])
+  })
+
   await t.test('should not change a relative link', async function () {
     assert.equal(
       String(
@@ -319,7 +325,7 @@ test('rehypeExternalLinks', async function (t) {
               '<a href="http://example.com">http</a>\n<a href="http://example.com"><img src="./image.png" /></a>'
             )
         ),
-        '<a href="http://example.com" target="_blank" rel="noopener noreferrer">http<span class="alpha bravo"> (opens in a new window)</span></a>\n<a href="http://example.com" rel="nofollow"><img src="./image.png"><span class="alpha bravo"> (opens in a new window)</span></a>'
+        '<a href="http://example.com" rel="noopener noreferrer" target="_blank">http<span class="alpha bravo"> (opens in a new window)</span></a>\n<a href="http://example.com" rel="nofollow"><img src="./image.png"><span class="alpha bravo"> (opens in a new window)</span></a>'
       )
     }
   )
@@ -332,8 +338,9 @@ test('rehypeExternalLinks', async function (t) {
           await rehype()
             .use({settings: {fragment: true}})
             .use(rehypeExternalLinks, {
-              test: (node) =>
-                node.properties && node.properties.href === 'http://example.com'
+              test(node) {
+                return node.properties.href === 'http://example.com'
+              }
             })
             .process('<a href="http://example.com">http</a>')
         ),
@@ -350,8 +357,9 @@ test('rehypeExternalLinks', async function (t) {
           await rehype()
             .use({settings: {fragment: true}})
             .use(rehypeExternalLinks, {
-              test: (node) =>
-                node.properties && node.properties.href === 'http://foobar.com'
+              test(node) {
+                return node.properties.href === 'http://foobar.com'
+              }
             })
             .process('<a href="http://example.com">http</a>')
         ),
@@ -363,7 +371,12 @@ test('rehypeExternalLinks', async function (t) {
 
 /**
  * @param {Element} node
+ *   Element.
+ * @returns {boolean}
+ *   Whether `node` has a direct `img` child.
  */
 function hasDirectImageChild(node) {
-  return node.children.some((d) => d.type === 'element' && d.tagName === 'img')
+  return node.children.some(function (d) {
+    return d.type === 'element' && d.tagName === 'img'
+  })
 }
