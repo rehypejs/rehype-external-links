@@ -198,6 +198,9 @@ Configuration (TypeScript type).
 *   `contentProperties` ([`CreateProperties`][api-create-properties] or
     [`Properties`][hast-properties], optional)
     — properties to add to the `span` wrapping `content`
+*   `properties` ([`CreateProperties`][api-create-properties] or
+    [`Properties`][hast-properties], optional)
+    — properties to add to the link itself
 *   `protocols` (`Array<string>`, default: `['http', 'https']`)
     — protocols to see as external, such as `mailto` or `tel`
 *   `rel` (`Array<string>`, [`CreateRel`][api-create-rel], or `string`,

@@ -367,6 +367,21 @@ test('rehypeExternalLinks', async function (t) {
       )
     }
   )
+
+  await t.test(
+    'should add properties to the link w/ `properties`',
+    async function () {
+      assert.equal(
+        String(
+          await rehype()
+            .use({settings: {fragment: true}})
+            .use(rehypeExternalLinks, {properties: {className: ['external']}})
+            .process('<a href="http://example.com">http</a>')
+        ),
+        '<a href="http://example.com" class="external" rel="nofollow">http</a>'
+      )
+    }
+  )
 })
 
 /**
