@@ -18,8 +18,13 @@
 *   [Use](#use)
 *   [API](#api)
     *   [`unified().use(rehypeExternalLinks[, options])`](#unifieduserehypeexternallinks-options)
-*   [Examples](#examples)
-    *   [Example: dynamic options](#example-dynamic-options)
+    *   [`CreateContent`](#createcontent)
+    *   [`CreateProperties`](#createproperties)
+    *   [`CreateProtocols`](#createprotocols)
+    *   [`CreateRel`](#createrel)
+    *   [`CreateTarget`](#createtarget)
+    *   [`Options`](#options)
+    *   [`Target`](#target)
 *   [Types](#types)
 *   [Compatibility](#compatibility)
 *   [Security](#security)
@@ -51,8 +56,8 @@ on your website.
 
 ## Install
 
-This package is [ESM only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c).
-In Node.js (version 12.20+, 14.14+, or 16.0+), install with [npm][]:
+This package is [ESM only][esm].
+In Node.js (version 16+), install with [npm][]:
 
 ```sh
 npm install rehype-external-links
@@ -74,14 +79,14 @@ In browsers with [`esm.sh`][esmsh]:
 
 ## Use
 
-Say our module `example.js` looks as follows:
+Say our module `example.js` contains:
 
 ```js
-import {unified} from 'unified'
+import rehypeExternalLinks from 'rehype-external-links'
 import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
-import rehypeExternalLinks from 'rehype-external-links'
 import rehypeStringify from 'rehype-stringify'
+import {unified} from 'unified'
 
 const file = await unified()
   .use(remarkParse)
@@ -93,7 +98,7 @@ const file = await unified()
 console.log(String(file))
 ```
 
-Now running `node example.js` yields:
+…then running `node example.js` yields:
 
 ```html
 <p><a href="https://github.com/rehypejs/rehype" rel="nofollow">rehype</a></p>
@@ -102,116 +107,158 @@ Now running `node example.js` yields:
 ## API
 
 This package exports no identifiers.
-The default export is `rehypeExternalLinks`.
+The default export is [`rehypeExternalLinks`][api-rehype-external-links].
 
 ### `unified().use(rehypeExternalLinks[, options])`
 
-Add `rel` (and `target`) to external links.
+Automatically add `rel` (and `target`?) to external links.
 
-##### `options`
+###### Parameters
 
-Configuration (optional).
+*   `options` ([`Options`][api-options], optional)
+    — configuration
 
-###### `options.target`
+###### Returns
 
-How to open external documents (`string?`: `_self`, `_blank`, `_parent`,
-or `_top`, default: `undefined`).
-Can also be a function called with the current element to get `target`
-dynamically.
-The default (nothing) is to not set `target`s on links.
+Transform ([`Transformer`][unified-transformer]).
 
-> 👉 **Note**: [you should likely not configure this][css-tricks].
+###### Notes
 
-###### `options.rel`
+You should [likely not configure `target`][css-tricks].
 
-[Link types][mdn-rel] to hint about the referenced documents (`Array<string>`
-or `string`, default: `['nofollow']`).
-Can also be a function called with the current element to get `rel` dynamically.
-Pass an empty array (`[]`) to not set `rel`s on links.
+You should at least set `rel` to `['nofollow']`.
+When using a `target`, add `noopener` and `noreferrer` to avoid exploitation
+of the `window.opener` API.
 
-> 👉 **Note**: you should at least set `['nofollow']`.
+When using a `target`, you should set `content` to adhere to accessibility
+guidelines by [giving users advanced warning when opening a new window][g201].
 
-> ⚠️ **Danger**: when using a `target`, add [`noopener` and `noreferrer`][mdn-a]
-> to avoid exploitation of the `window.opener` API.
+### `CreateContent`
 
-###### `options.protocols`
+Create a target for the element (TypeScript type).
 
-Protocols to see as external, such as `mailto` or `tel` (`Array<string>`,
-default: `['http', 'https']`).
-Can also be a function called with the current element to get `protocols`
-dynamically.
+###### Parameters
 
-###### `options.content`
+*   `element` ([`Element`][hast-element])
+    — element to check
 
-**[hast][]** content to insert at the end of external links ([`Node`][node] or
-[`Children`][children], optional).
-Can also be a function called with the current element to get `content`
-dynamically.
-The content will be inserted in a `<span>` element.
+###### Returns
 
-> 👉 **Note**: you should set this when using `target` to adhere to
-> accessibility guidelines by [giving users advanced warning when opening a new
-> window][g201].
+Content to add (`Array<Node>` or `Node`, optional).
 
-###### `options.contentProperties`
+### `CreateProperties`
 
-Attributes to add to the `<span>`s wrapping `options.content`
-([`Properties`][properties], optional).
-Can also be a function called with the current element to get
-`contentProperties` dynamically.
+Create properties for an element (TypeScript type).
 
-###### `options.test`
+###### Parameters
 
-Additional test to define which external link elements are modified.
-Any test that can be given to [hast-util-is-element](https://github.com/syntax-tree/hast-util-is-element)
-is supported.  The default (no test) is to modify all external links.
+*   `element` ([`Element`][hast-element])
+    — element to check
 
-> 👉 **Note**: in this case it only makes sense to provide a test function
-> since this plugin will only consider `a` tags.
+###### Returns
 
-## Examples
+Properties to add ([`Properties`][hast-properties], optional).
 
-### Example: dynamic options
+### `CreateProtocols`
 
-This example shows how to define options dynamically.
-That means that you can choose per element what to generate.
+Create protocols to see as absolute (TypeScript type).
 
-Each option can be a function which is called with the current element
-(`Element`) and returns the corresponding value.
+###### Parameters
 
-Taking the above `example.js` and applying the following diff:
+*   `element` ([`Element`][hast-element])
+    — element to check
 
-```diff
- const file = await unified()
-   .use(remarkParse)
-   .use(remarkRehype)
--  .use(rehypeExternalLinks, {rel: ['nofollow']})
-+  .use(rehypeExternalLinks, {
-+    target(element) {
-+      return element.properties && element.properties.id === '5'
-+        ? '_blank'
-+        : undefined
-+    },
-+    rel: ['nofollow']
-+  })
-   .use(rehypeStringify)
-   .process('[rehype](https://github.com/rehypejs/rehype)')
+###### Returns
+
+Protocols to use (`Array<string>`, optional).
+
+### `CreateRel`
+
+Create a `rel` for the element (TypeScript type).
+
+###### Parameters
+
+*   `element` ([`Element`][hast-element])
+    — element to check
+
+###### Returns
+
+`rel` to use (`Array<string>`, optional).
+
+### `CreateTarget`
+
+Create a `target` for the element (TypeScript type).
+
+###### Parameters
+
+*   `element` ([`Element`][hast-element])
+    — element to check
+
+###### Returns
+
+`target` to use ([`Target`][api-target], optional).
+
+### `Options`
+
+Configuration (TypeScript type).
+
+###### Fields
+
+*   `content` (`Array<Node>`, [`CreateContent`][api-create-content], or `Node`,
+    optional)
+    — content to insert at the end of external links; will be inserted in a
+    `<span>` element; useful for improving accessibility by giving users
+    advanced warning when opening a new window
+*   `contentProperties` ([`CreateProperties`][api-create-properties] or
+    [`Properties`][hast-properties], optional)
+    — properties to add to the `span` wrapping `content`
+*   `protocols` (`Array<string>` or
+    [`CreateProtocols`][api-create-protocols], default: `['http', 'https']`)
+    — protocols to see as external, such as `mailto` or `tel`
+*   `rel` (`Array<string>`, [`CreateRel`][api-create-rel], or `string`,
+    default: `['nofollow']`)
+    — [link types][mdn-rel] to hint about the referenced documents; pass an
+    empty array (`[]`) to not set `rel`s on links; when using a `target`, add `noopener`
+    and `noreferrer` to avoid exploitation of the `window.opener` API
+*   `target` ([`CreateTarget`][api-create-target] or [`Target`][api-target],
+    optional)
+    — how to display referenced documents; the default (nothing) is to not set
+    `target`s on links
+*   `test` ([`Test`][is-test], optional)
+    — extra test to define which external link elements are modified; any test
+    that can be given to `hast-util-is-element` is supported
+
+### `Target`
+
+Target (TypeScript type).
+
+###### Type
+
+```ts
+type Target = '_blank' | '_parent' | '_self' | '_top'
 ```
-
-Changes to apply `target="_blank"` on the element with an `id="5"`.
 
 ## Types
 
 This package is fully typed with [TypeScript][].
-It exports an `Options` type, which specifies the interface of the accepted
-options.
+It exports the additional types
+[`CreateContent`][api-create-content],
+[`CreateProperties`][api-create-properties],
+[`CreateProtocols`][api-create-protocols],
+[`CreateRel`][api-create-rel],
+[`CreateTarget`][api-create-target],
+[`Options`][api-options], and
+[`Target`][api-target].
 
 ## Compatibility
 
-Projects maintained by the unified collective are compatible with all maintained
+Projects maintained by the unified collective are compatible with maintained
 versions of Node.js.
-As of now, that is Node.js 12.20+, 14.14+, and 16.0+.
-Our projects sometimes work with older versions, but this is not guaranteed.
+
+When we cut a new major release, we drop support for unmaintained versions of
+Node.
+This means we try to keep the current release line, `rehype-external-links@^2`,
+compatible with Node.js 12.
 
 This plugin works with `rehype-parse` version 3+, `rehype-stringify` version 3+,
 `rehype` version 4+, and `unified` version 6+.
@@ -252,9 +299,9 @@ abide by its terms.
 
 [downloads]: https://www.npmjs.com/package/rehype-external-links
 
-[size-badge]: https://img.shields.io/bundlephobia/minzip/rehype-external-links.svg
+[size-badge]: https://img.shields.io/bundlejs/size/rehype-external-links
 
-[size]: https://bundlephobia.com/result?p=rehype-external-links
+[size]: https://bundlejs.com/?q=rehype-external-links
 
 [sponsors-badge]: https://opencollective.com/unified/sponsors/badge.svg
 
@@ -267,6 +314,8 @@ abide by its terms.
 [chat]: https://github.com/rehypejs/rehype/discussions
 
 [npm]: https://docs.npmjs.com/cli/install
+
+[esm]: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
 
 [esmsh]: https://esm.sh
 
@@ -282,28 +331,42 @@ abide by its terms.
 
 [author]: https://wooorm.com
 
+[hast-properties]: https://github.com/syntax-tree/hast#properties
+
+[is-test]: https://github.com/syntax-tree/hast-util-is-element#test
+
+[mdn-rel]: https://developer.mozilla.org/en-US/docs/Web/HTML/Link_types
+
+[rehype]: https://github.com/rehypejs/rehype
+
+[rehype-sanitize]: https://github.com/rehypejs/rehype-sanitize
+
 [typescript]: https://www.typescriptlang.org
 
 [unified]: https://github.com/unifiedjs/unified
 
-[rehype]: https://github.com/rehypejs/rehype
+[unified-transformer]: https://github.com/unifiedjs/unified#transformer
 
 [xss]: https://en.wikipedia.org/wiki/Cross-site_scripting
 
-[rehype-sanitize]: https://github.com/rehypejs/rehype-sanitize
-
-[mdn-rel]: https://developer.mozilla.org/en-US/docs/Web/HTML/Link_types
-
-[mdn-a]: https://developer.mozilla.org/en/docs/Web/HTML/Element/a
-
-[hast]: https://github.com/syntax-tree/hast
-
-[properties]: https://github.com/syntax-tree/hast#properties
-
-[node]: https://github.com/syntax-tree/hast#nodes
-
-[children]: https://github.com/syntax-tree/unist#child
+[hast-element]: https://github.com/syntax-tree/hast#element
 
 [g201]: https://www.w3.org/WAI/WCAG21/Techniques/general/G201
 
 [css-tricks]: https://css-tricks.com/use-target_blank/
+
+[api-create-content]: #createcontent
+
+[api-create-properties]: #createproperties
+
+[api-create-protocols]: #createprotocols
+
+[api-create-rel]: #createrel
+
+[api-create-target]: #createtarget
+
+[api-options]: #options
+
+[api-target]: #target
+
+[api-rehype-external-links]: #unifieduserehypeexternallinks-options
