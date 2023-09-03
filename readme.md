@@ -20,7 +20,6 @@
     *   [`unified().use(rehypeExternalLinks[, options])`](#unifieduserehypeexternallinks-options)
     *   [`CreateContent`](#createcontent)
     *   [`CreateProperties`](#createproperties)
-    *   [`CreateProtocols`](#createprotocols)
     *   [`CreateRel`](#createrel)
     *   [`CreateTarget`](#createtarget)
     *   [`Options`](#options)
@@ -159,19 +158,6 @@ Create properties for an element (TypeScript type).
 
 Properties to add ([`Properties`][hast-properties], optional).
 
-### `CreateProtocols`
-
-Create protocols to see as absolute (TypeScript type).
-
-###### Parameters
-
-*   `element` ([`Element`][hast-element])
-    — element to check
-
-###### Returns
-
-Protocols to use (`Array<string>`, optional).
-
 ### `CreateRel`
 
 Create a `rel` for the element (TypeScript type).
@@ -212,8 +198,7 @@ Configuration (TypeScript type).
 *   `contentProperties` ([`CreateProperties`][api-create-properties] or
     [`Properties`][hast-properties], optional)
     — properties to add to the `span` wrapping `content`
-*   `protocols` (`Array<string>` or
-    [`CreateProtocols`][api-create-protocols], default: `['http', 'https']`)
+*   `protocols` (`Array<string>`, default: `['http', 'https']`)
     — protocols to see as external, such as `mailto` or `tel`
 *   `rel` (`Array<string>`, [`CreateRel`][api-create-rel], or `string`,
     default: `['nofollow']`)
@@ -244,7 +229,6 @@ This package is fully typed with [TypeScript][].
 It exports the additional types
 [`CreateContent`][api-create-content],
 [`CreateProperties`][api-create-properties],
-[`CreateProtocols`][api-create-protocols],
 [`CreateRel`][api-create-rel],
 [`CreateTarget`][api-create-target],
 [`Options`][api-options], and
@@ -358,8 +342,6 @@ abide by its terms.
 [api-create-content]: #createcontent
 
 [api-create-properties]: #createproperties
-
-[api-create-protocols]: #createprotocols
 
 [api-create-rel]: #createrel
 
