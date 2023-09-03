@@ -65,14 +65,14 @@ npm install rehype-external-links
 In Deno with [`esm.sh`][esmsh]:
 
 ```js
-import rehypeExternalLinks from 'https://esm.sh/rehype-external-links@1'
+import rehypeExternalLinks from 'https://esm.sh/rehype-external-links@3'
 ```
 
 In browsers with [`esm.sh`][esmsh]:
 
 ```html
 <script type="module">
-  import rehypeExternalLinks from 'https://esm.sh/rehype-external-links@1?bundle'
+  import rehypeExternalLinks from 'https://esm.sh/rehype-external-links@3?bundle'
 </script>
 ```
 
